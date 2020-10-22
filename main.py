@@ -4,7 +4,7 @@ import pickle
 
 # Load News Api key, Mail keys from pickled tuple:
 with open("keys.bin", "rb") as f:
-    N_KEY, M_KEY, O_KEY = pickle.load(f)
+    N_KEY, T_KEY, O_KEY = pickle.load(f)
 
 URL = "https://newsapi.org/v2/"
 SOURCES = """abc-news,
@@ -40,5 +40,8 @@ def get_news():
     if resp.ok: return resp 
     else: return resp.status_code
 
-news = get_news().json()
 pp.pprint(news)
+
+if __name__ == "__main__":
+    
+    news = get_news().json()
