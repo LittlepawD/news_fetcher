@@ -7,7 +7,6 @@ with open("keys.bin", "rb") as f:
     N_KEY, T_KEY, O_KEY = pickle.load(f)
 
 class News_fetcher:
-
     def __init__(self, api_key):
         self._KEY = api_key
         self.URL = "https://newsapi.org/v2/"
@@ -69,5 +68,4 @@ if __name__ == "__main__":
             pp.pprint(new["title"])
             bot.send_article(new)
             counter += 1
-
     print(f"\nSent {counter} news.")
