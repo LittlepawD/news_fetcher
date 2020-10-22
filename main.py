@@ -3,7 +3,7 @@ import pprint as pp
 import pickle, telebot, datetime
 
 # Load News Api key, Mail keys from pickled tuple:
-with open("keys.bin", "rb") as f:
+with open(r"/home/dbodnr37/news_fetcher/keys.bin", "rb") as f:
     N_KEY, T_KEY, O_KEY = pickle.load(f)
 
 class News_fetcher:
@@ -61,11 +61,11 @@ if __name__ == "__main__":
 
     # Get and parse news:
     news = fetcher.get_news().json()
-    print(f"Fetcher got {news['totalResults']} news.")
+    # print(f"Fetcher got {news['totalResults']} news.")
     counter = 0
     for new in news["articles"]:
         if "reuters india" not in new["title"].lower():
             pp.pprint(new["title"])
             bot.send_article(new)
             counter += 1
-    print(f"\nSent {counter} news.")
+    # print(f"\nSent {counter} news.")
