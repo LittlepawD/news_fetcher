@@ -1,3 +1,7 @@
+"""
+Tests connection to telegram via TelegramBotAPI
+"""
+
 import main as m
 
 dev_chat_id = 449951283
