@@ -2,8 +2,9 @@ import requests as rq
 import pprint as pp
 import pickle, telebot, datetime
 
+PATH = "/home/dbodnr37/news_fetcher/"
 # Load News Api key, Mail keys from pickled tuple:
-with open(r"/home/dbodnr37/news_fetcher/keys.bin", "rb") as f:
+with open(PATH + "keys.bin", "rb") as f:
     N_KEY, T_KEY, O_KEY = pickle.load(f)
 
 class News_fetcher:
@@ -38,10 +39,10 @@ class News_fetcher:
 
     def load_news_set(self):
         try:
-            with open("news_set.bin", "rb") as f:
+            with open(PATH + "news_set.bin", "rb") as f:
                 news_set = pickle.load(f)
         except IOError:
-            with open("news_set.bin", "wb") as f:
+            with open(PATH + "news_set.bin", "wb") as f:
                 pickle.dump(set(), f)
             print("Created new news_set.bin file.")
             news_set = set()
@@ -52,7 +53,7 @@ class News_fetcher:
             return set()
 
     def save_news_set(self):
-        with open("news_set.bin", "wb") as f:
+        with open(PATH + "news_set.bin", "wb") as f:
             pickle.dump(self.news_set, f)
 
     def pick_new(self, news):
@@ -103,7 +104,7 @@ if __name__ == "__main__":
     counter = 0
     for article in new_articles:
         if "reuters india" not in article["title"].lower():
-            pp.pprint(article["title"])
-            # bot.send_article(article)
+            # pp.pprint(article["title"])
+            bot.send_article(article)
             counter += 1
     # print(f"\nSent {counter} news.")
