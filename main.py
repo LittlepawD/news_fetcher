@@ -3,7 +3,7 @@ import pprint as pp
 import pickle, telebot, datetime
 
 # Load News Api key, Mail keys from pickled tuple:
-with open("keys.bin", "rb") as f:
+with open(r"/home/dbodnr37/news_fetcher/keys.bin", "rb") as f:
     N_KEY, T_KEY, O_KEY = pickle.load(f)
 
 class News_fetcher:
@@ -51,8 +51,6 @@ class News_fetcher:
         else:
             return set()
 
-
-
     def save_news_set(self):
         with open("news_set.bin", "wb") as f:
             pickle.dump(self.news_set, f)
@@ -64,12 +62,8 @@ class News_fetcher:
             if article["url"] not in self.news_set:
                 new_articles.append(article)
                 self.news_set.add(article["url"])
-                # Problém - set bude růst s každým novým článkem. Přidat skript který bude jednou za týden set čistit?
-                # nebo při načítání nahradit prázdným pokud délka přesáhla něco... Ani jedno ovšem není ideální a nezabrání duplicitám za všech okolností 
         self.save_news_set()
         return new_articles            
-
-
 
     # Poznamky ke zdrojum - independent má news digest, s minutovymi zpravami, nahovno
     # reuters vydava zpravy 2x, pro .com a indii
@@ -89,6 +83,7 @@ class News_fetcher:
             return resp.json()
         else:
             return resp.status_code
+
 
 class NewsTeleBot(telebot.TeleBot):
     def send_article(self, article):
@@ -111,4 +106,4 @@ if __name__ == "__main__":
             pp.pprint(article["title"])
             # bot.send_article(article)
             counter += 1
-    print(f"\nSent {counter} news.")
+    # print(f"\nSent {counter} news.")
