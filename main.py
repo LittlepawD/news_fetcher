@@ -47,7 +47,7 @@ class News_fetcher:
             print("Created new news_set.bin file.")
             news_set = set()
 
-        if len(news_set) <= 100:
+        if len(news_set) <= 200:
             return news_set
         else:
             return set()
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     counter = 0
     for article in new_articles:
         if "reuters india" not in article["title"].lower():
-            # pp.pprint(article["title"])
+            print(article["title"])
             bot.send_article(article)
             counter += 1
-    # print(f"\nSent {counter} news.")
+    print(f"\nSent {counter} news.")
