@@ -51,8 +51,6 @@ class News_fetcher:
         else:
             return set()
 
-
-
     def save_news_set(self):
         with open("news_set.bin", "wb") as f:
             pickle.dump(self.news_set, f)
@@ -69,10 +67,10 @@ class News_fetcher:
         self.save_news_set()
         return new_articles            
 
-
-
     # Poznamky ke zdrojum - independent má news digest, s minutovymi zpravami, nahovno
     # reuters vydava zpravy 2x, pro .com a indii
+    # reuters někdy publikuje i stejne članky v jine domene - uk.reuters a www.reuters, zbytek linku je stejný.
+    # dalo by se vyřešit tím, že by se ukládal porovnával pouze konec linku, který je stejný.
     # od independent a washington post přišla zpráva (jiná ale se stejným linkem) 2x.
 
     def get_news(self):
