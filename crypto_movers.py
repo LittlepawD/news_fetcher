@@ -46,7 +46,7 @@ class Client:
 
     def _construct_currency_entry(self, product: dict) -> dict:
         currency_pair = product["base_currency"] + "-USD"
-        prices = self.get_prices(currency_pair)
+        prices = self._get_prices(currency_pair)
         # In case currency pair prices are not found:
         if "message" in prices:
             currency = {
@@ -67,7 +67,7 @@ class Client:
             }
         return currency
 
-    def get_prices(self, currency_pair: str) -> list:
+    def _get_prices(self, currency_pair: str) -> list:
         # Now this polls one hour stats, which are calculated into average value. For more detailed values granularity 900 could be used.
         # This would need to be addressed in calc price diff func as the number of items in a list will increase 4x.
         t_now = datetime.utcnow()
