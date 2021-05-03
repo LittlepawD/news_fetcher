@@ -2,6 +2,8 @@ import requests as rq
 import pprint as pp
 import pickle, telebot, datetime
 
+import crypto_movers
+
 # Load News Api key, Mail keys from pickled tuple:
 with open("keys.bin", "rb") as f:
     N_KEY, T_KEY, O_KEY = pickle.load(f)
@@ -88,25 +90,51 @@ class News_fetcher:
         else:
             return resp.status_code
 
+
 class NewsTeleBot(telebot.TeleBot):
-    def send_article(self, article):
-        channel = "@SnepsCzechNews"
-        self.send_message(channel, f"<b>{article['title']}</b>\n\n{article['description']}\n{article['url']}", parse_mode="html")
+    def __init__(self, token, **kwargs):
+        super().__init__(token, **kwargs)
+        self.news_channel = "@SnepsCzechNews"
+
+    def _send_article(self, article: dict):
+        text = f"<b>{article['title']}</b>\n\n{article['description']}\n{article['url']}"
+        self.send_message(self.news_channel, text, parse_mode="html")
         # self.send_message(channel, f"<b>{article['title']}</b>\n\n{article['url']}", parse_mode="html", disable_web_page_preview=False)
+
+    def send_crypto_report(self):
+        crypto_cli = crypto_movers.Client()
+        crypto_cli.load_crypto()
+        # print("crypto loaded")
+        btc_diff = crypto_cli.get_currency_diff_24("BTC")
+        try:
+            if btc_diff > 0:
+                btc_diff = "+" + str(btc_diff)
+        except TypeError:
+            # in case diff is NaN
+            pass
+
+        text = "<b>Crypto report</b>\n\n" + \
+            f"BTC: {crypto_cli.get_btc_price('EUR')} EUR  {btc_diff}%\n\n" + \
+            crypto_cli.construct_message(24)
+        self.send_message(self.news_channel, text, parse_mode="html")
+
+    def send_articles(self, new_articles: list):
+        counter = 0
+        for article in new_articles:
+            if "reuters india" not in article["title"].lower():
+                pp.pprint(article["title"])
+                self._send_article(article)
+                counter += 1
+        print(f"\nSent {counter} news.")
 
 
 if __name__ == "__main__":
     # init bot, fetcher:
     bot = NewsTeleBot(T_KEY)
     fetcher = News_fetcher(N_KEY)
-
     # Get and parse news:
     news = fetcher.get_news()
     new_articles = fetcher.pick_new(news)
-    counter = 0
-    for article in new_articles:
-        if "reuters india" not in article["title"].lower():
-            pp.pprint(article["title"])
-            # bot.send_article(article)
-            counter += 1
-    print(f"\nSent {counter} news.")
+    bot.send_articles(new_articles)
+
+    bot.send_crypto_report()
