@@ -1,5 +1,5 @@
 """
-Tests connection to telegram via TelegramBotAPI
+Tests connection to telegram, coinbase and import of all modules.
 """
 
 import main as m

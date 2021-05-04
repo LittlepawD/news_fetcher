@@ -101,21 +101,28 @@ class NewsTeleBot(telebot.TeleBot):
         self.send_message(self.news_channel, text, parse_mode="html")
         # self.send_message(channel, f"<b>{article['title']}</b>\n\n{article['url']}", parse_mode="html", disable_web_page_preview=False)
 
+    def _construct_crypto_prices(self, currencies: list):
+        strings = []
+        for pair in currencies:
+            diff = crypto_movers.add_plus_sign(self.crypto_cli.get_currency_diff_24(pair['crypto']))
+            string = f"{pair['crypto']}: {self.crypto_cli.get_crypto_price(pair['crypto'], pair['currency'])} {pair['currency']}  {diff}%"
+            strings.append(string)
+        return "\n".join(strings)
+
     def send_crypto_report(self):
-        crypto_cli = crypto_movers.Client()
-        crypto_cli.load_crypto()
+        self.crypto_cli = crypto_movers.Client()
+        self.crypto_cli.load_crypto()
         # print("crypto loaded")
-        btc_diff = crypto_cli.get_currency_diff_24("BTC")
-        try:
-            if btc_diff > 0:
-                btc_diff = "+" + str(btc_diff)
-        except TypeError:
-            # in case diff is NaN
-            pass
+
+        currencies_list = [
+            {"crypto": "BTC", "currency": "EUR"},
+            {"crypto": "ETH", "currency": "USD"},
+            {"crypto": "LTC", "currency": "USD"},
+        ]
 
         text = "<b>Crypto report</b>\n\n" + \
-            f"BTC: {crypto_cli.get_btc_price('EUR')} EUR  {btc_diff}%\n\n" + \
-            crypto_cli.construct_message(24)
+            self._construct_crypto_prices(currencies_list) + "\n\n" +\
+            self.crypto_cli.construct_message(24)
         self.send_message(self.news_channel, text, parse_mode="html")
 
     def send_articles(self, new_articles: list):

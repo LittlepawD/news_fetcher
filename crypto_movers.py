@@ -41,12 +41,15 @@ class Client:
         for product in products:
             if product["base_currency"] not in cur_set:
                 cur_set.add(product["base_currency"])
+                # this polls data from coinbase API.
+                # TODO Try multiprocessing to increase speed and reliability
                 currencies.append(self._construct_currency_entry(product))
         self.currencies = currencies
 
     def _construct_currency_entry(self, product: dict) -> dict:
         currency_pair = product["base_currency"] + "-USD"
         prices = self._get_prices(currency_pair)
+        # TODO try polling again if currency pair was not found
         # In case currency pair prices are not found:
         if "message" in prices:
             currency = {
@@ -76,15 +79,16 @@ class Client:
 
     def construct_message(self, interval: int) -> str:
         high, low = pick_top_movers(self.currencies, interval)
-        high_str = [f"{h['currency']}: +{h['diff_' + str(interval)]}%" for h in high]
-        low_str = [f"{h['currency']}: {h['diff_' + str(interval)]}%" for h in low]
+        difference = 'diff_' + str(interval)
+        high_str = [f"{val['currency']}: {add_plus_sign(val[difference])}%" for val in high]
+        low_str = [f"{val['currency']}: {add_plus_sign(val[difference])}%" for val in low]
         message = f"""Top movers in past {interval} hours:
 {'  '.join(high_str)}
 {'  '.join(low_str)}"""
         return message
     
-    def get_btc_price(self, currency: str) -> str:
-        URL = "https://api.coinbase.com/v2/prices/spot?currency=" + currency
+    def get_crypto_price(self, crypto: str,  currency: str) -> str:
+        URL = f"https://api.coinbase.com/v2/prices/{crypto}-{currency}/spot"
         resp = requests.request("GET", URL)
         if resp.ok:
             return resp.json()["data"]["amount"]
@@ -99,6 +103,15 @@ class Client:
         return cur_dict["diff_24"] 
 
 
+def add_plus_sign(value) -> str:
+    try:
+        if value > 0:
+            return "+" + str(value)
+        else:
+            return str(value)
+    except TypeError:
+        return value
+
 def pick_top_movers(currencies: list, interval: int) -> tuple :
     currencies = [currency  for currency in currencies if "NaN" not in currency.values()]
     currencies.sort(key=lambda n: n["diff_" + str(interval)], reverse=True)
@@ -106,9 +119,10 @@ def pick_top_movers(currencies: list, interval: int) -> tuple :
     return currencies[:3], currencies[-1:-4:-1]
 
 if __name__ == "__main__":
+    # For testing purposes
     cli = Client()
     cli.load_crypto()
     # # pp.pprint(currencies)
-    # print(cli.construct_message(12))
-    # print(cli.construct_message(24))
+    print(cli.construct_message(12))
+    print(cli.construct_message(24))
     print(cli.get_currency_diff_24("BTC"))
